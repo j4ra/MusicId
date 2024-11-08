@@ -34,7 +34,7 @@ There are two parameters: `cron` and `rate`.
 
 > __Q: I see some errors in the logs.__
 > 
-> A: There is nothing to worry about. Important part is the 
+> A: There is nothing to worry about. Important part is the stats at the end of each run. These have following format: "Visited: (total files visited) Skipped: (files with filled metadata) Error: (number of error encountered) Updated: (files that were identified and updated)"
 
 > __Q: If I have an issue, what should I do?__
 > 

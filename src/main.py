@@ -47,13 +47,16 @@ def update_necessary(file_path):
     Returns True if the key metadata are missing and the update is necessary.
     """
     audiofile = eyed3.load(file_path)
-    if audiofile.tag.artist == "" or audiofile.tag.artist == None or audiofile.tag.artist == "Unknown Artist":
+    artist = audiofile.tag.artist
+    title = audiofile.tag.title
+    album = audiofile.tag.album
+    if artist == "" or artist == None or artist.lower() == "unknown artist":
         return True
     
-    if audiofile.tag.title == "" or audiofile.tag.title == None or audiofile.tag.title == "Unknown Title":
+    if title == "" or title == None or title.lower() == "unknown title" or "track" in title.lower():
         return True
     
-    if audiofile.tag.album == "" or audiofile.tag.album == None or audiofile.tag.album == "Unknown Album":
+    if album == "" or album == None or album.lower() == "unknown album":
         return True
 
     return False
