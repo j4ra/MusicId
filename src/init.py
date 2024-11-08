@@ -6,7 +6,7 @@ import time
 
 def main():
     cron = os.getenv("cron", "0 */12 * * *")
-    rate_limit = os.getenv("rate", 4)
+    rate_limit = int(os.getenv("rate", 4))
 
     print("Starting the server with parameters:")
     print(f"\t cron : {cron}")

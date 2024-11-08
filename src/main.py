@@ -27,10 +27,13 @@ def instance_already_running(label="default"):
     return already_running
 
 async def get_metadata(file_path):
+    """
+    Uses shazamio API to detect metadata about a song
+    """
     shazam = Shazam()
     out = await shazam.recognize(file_path)
     song_info = out['track']
-    
+
     artist = song_info.get('subtitle', 'Unknown Artist')
     title = song_info.get('title', 'Unknown Title')
     album = song_info.get('sections', [{}])[0].get('metadata', [{}])[0].get("text", 'Unknown Album')
@@ -39,24 +42,75 @@ async def get_metadata(file_path):
 
     return artist, title, album, year, genres
 
+def update_necessary(file_path):
+    """
+    Returns True if the key metadata are missing and the update is necessary.
+    """
+    audiofile = eyed3.load(file_path)
+    if audiofile.tag.artist == "" or audiofile.tag.artist == None or audiofile.tag.artist == "Unknown Artist":
+        return True
+    
+    if audiofile.tag.title == "" or audiofile.tag.title == None or audiofile.tag.title == "Unknown Title":
+        return True
+    
+    if audiofile.tag.album == "" or audiofile.tag.album == None or audiofile.tag.album == "Unknown Album":
+        return True
+
+    return False
+
+def update_mp3_metadata(file_path, artist, title, album, year, genres):
+    """
+    Overwrites metadata of an mp3 file with the ones provided as parameters
+    """
+    audiofile = eyed3.load(file_path)
+    audiofile.tag.artist = artist
+    audiofile.tag.title = title
+    audiofile.tag.album = album
+    if year != "":
+        audiofile.tag.year = int(year)
+
+    audiofile.tag.genre = genres
+    audiofile.tag.save()
+
+
 def main():
     if instance_already_running():
         print("Another instance already running.")
         return
     
-    rate_limit = os.getenv("rate", 4)
-    sleep_time = 60 / rate_limit
+    rate_limit = int(os.getenv("rate", 4))
+    sleep_time = 60 / rate_limit   
+    stats = {'visited': 0, 'skipped': 0, 'updated': 0, 'error': 0}
     
+    def identify_and_update(full_path):
+        artist, title, album, year, genres = asyncio.run(get_metadata(full_path))
+        update_mp3_metadata(full_path, artist, title, album, year, genres)  
+
+    def process_file(filename):
+        stats['visited'] += 1
+        print(f"visited so far: {stats['visited']}", end="\r")
+        try:
+            if os.path.splitext(filename)[1] != ".mp3":
+                return
+
+            full_path = os.path.join(dirpath, filename)
+
+            if not update_necessary(full_path):
+                stats['skipped'] += 1
+                return
+
+            identify_and_update(full_path)
+            stats['updated'] += 1
+            time.sleep(sleep_time)
+        except:
+            stats['error'] += 1
+            return
+           
     for dirpath, dirnames, filenames in os.walk("/source/"):
             for filename in filenames:
-                if os.path.splitext(filename)[1] != ".mp3":
-                    continue
+                process_file(filename)
 
-                # Join the directory path with the file name
-                full_path = os.path.join(dirpath, filename)
-                artist, title, album, year, genres = asyncio.run(get_metadata(full_path))
-                print(f"{full_path}\n\tArtist: {artist}\n\tTitle: {title}\n\tAlbum: {album}\n\tYear: {year}\n\tGenres: {genres}\n")
-                time.sleep(sleep_time)
+    print(f"Visited: {stats['visited']} Skipped: {stats['skipped']} Error: {stats['error']} Updated: {stats['updated']}")
 
 if __name__ == '__main__':
     main()

@@ -1,0 +1,16 @@
+services:
+  musicid:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+      platforms:
+        - "linux/amd64"
+      tags:
+        - "musicid:0.0.1"
+        - "musicid:latest"
+    environment:
+      - cron="0 */12 * * *"
+      - rate=4
+    volumes:
+      - /path/to/your/music/directory/:/source/1/
+      - /path/to/other/music/directory/:/source/2/

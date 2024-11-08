@@ -1,8 +1,5 @@
 FROM python:3.10-slim
 
-RUN apt update
-RUN apt install -y ffmpeg
-
 WORKDIR /script/
 ADD /src/ /script/
 
