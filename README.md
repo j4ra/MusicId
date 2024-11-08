@@ -21,18 +21,23 @@ There are two parameters: `cron` and `rate`.
 ## FAQ
 
 > __Q: What formats are supported?__
+> 
 > A: mp3
 
 > __Q: Will it try to identify every mp3 file?__
+> 
 > A: No, only the files that are missing any of these properties: "Title", "Artist" or "Album".
 
 > __Q: Will it work perfectly?__
+> 
 > A: No, it will try its best. But some songs might be recognized wrongfully or not at all. Also, the album might be not recognized correctly as one song can appear on many albums. __Beware: the metadata are overwritten by the values returned by ShazamIO. USE AT YOUR OWN RISK__
 
 > __Q: I see some errors in the logs.__
+> 
 > A: There is nothing to worry about. Important part is the 
 
 > __Q: If I have an issue, what should I do?__
+> 
 > A: Ideally, fix it and make a PR 😉
 
 ## Disclaimer
