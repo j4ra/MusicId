@@ -3,11 +3,6 @@ services:
     build:
       context: ../
       dockerfile: docker/Dockerfile
-      platforms:
-        - "linux/amd64"
-      tags:
-        - "musicid:0.0.1"
-        - "musicid:latest"
     environment:
       - cron="0 */12 * * *"
       - rate=4
