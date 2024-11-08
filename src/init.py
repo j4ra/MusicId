@@ -7,13 +7,14 @@ import time
 def main():
     cron = os.getenv("cron", "0 */12 * * *")
     rate_limit = int(os.getenv("rate", 4))
+    force = bool(os.getenv("force", False))
 
     print("Starting the server with parameters:")
     print(f"\t cron : {cron}")
     print(f"\t frequency: {rate_limit} per minute")
     print ("running...")
 
-    res = subprocess.run(["python3", "/script/main.py"]).returncode
+    res = subprocess.run(["python3", "/script/main.py", f"--force={force}"]).returncode
     if res != 0:
         print("stopping")
         return

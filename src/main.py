@@ -3,6 +3,8 @@ import os
 import time
 import asyncio
 import eyed3
+import argparse
+from datetime import datetime
 from shazamio import Shazam
 
 def instance_already_running(label="default"):
@@ -50,13 +52,13 @@ def update_necessary(file_path):
     artist = audiofile.tag.artist
     title = audiofile.tag.title
     album = audiofile.tag.album
-    if artist == "" or artist == None or artist.lower() == "unknown artist":
+    if artist == "" or artist == None or artist.lower() == "unknown artist" or "track" in artist.lower():
         return True
     
     if title == "" or title == None or title.lower() == "unknown title" or "track" in title.lower():
         return True
     
-    if album == "" or album == None or album.lower() == "unknown album":
+    if album == "" or album == None or album.lower() == "unknown album" or "track" in album.lower():
         return True
 
     return False
@@ -75,12 +77,21 @@ def update_mp3_metadata(file_path, artist, title, album, year, genres):
     audiofile.tag.genre = genres
     audiofile.tag.save()
 
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--force", help="Force update of all files encountered", default=False, type=bool)
+    args = parser.parse_args()
+    return args.force
+
 
 def main():
     if instance_already_running():
         print("Another instance already running.")
         return
-    
+
+    eyed3.log.setLevel("ERROR")
+
+    force = parse_arguments()
     rate_limit = int(os.getenv("rate", 4))
     sleep_time = 60 / rate_limit   
     stats = {'visited': 0, 'skipped': 0, 'updated': 0, 'error': 0}
@@ -98,7 +109,7 @@ def main():
 
             full_path = os.path.join(dirpath, filename)
 
-            if not update_necessary(full_path):
+            if not update_necessary(full_path) and not force:
                 stats['skipped'] += 1
                 return
 
@@ -113,7 +124,7 @@ def main():
             for filename in filenames:
                 process_file(filename)
 
-    print(f"Visited: {stats['visited']} Skipped: {stats['skipped']} Error: {stats['error']} Updated: {stats['updated']}")
+    print(f"{datetime.now()}: Visited: {stats['visited']} Skipped: {stats['skipped']} Error: {stats['error']} Updated: {stats['updated']}")
 
 if __name__ == '__main__':
     main()

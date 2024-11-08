@@ -3,9 +3,22 @@ services:
     build:
       context: ../
       dockerfile: docker/Dockerfile
+    container_name: musicid
+    ###
+    # cron - schedule of source directory scan
+    # rate - limit the amount of requests to shazamio to this number of requests per minute
+    # force - force update of all files (even those that have good metadata)
+    #       - this only applies to the first run
+    ###
     environment:
-      - cron="0 */12 * * *"
+      - cron=0 */12 * * * 
       - rate=4
+      - force=false
+    deploy:
+      resources:
+        limits:
+          memory: '256M'
     volumes:
+    # map your music directories so that they point to /source/ directory in the container
       - /path/to/your/music/directory/:/source/1/
       - /path/to/other/music/directory/:/source/2/
